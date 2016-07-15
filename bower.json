@@ -1,0 +1,21 @@
+{
+  "name": "ropetiski-helper",
+  "description": "Tool for Ropecon 2016 role-playing game help desk",
+  "main": "index.js",
+  "authors": [
+    "Arttu Hanska"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "ropecon"
+  ],
+  "homepage": "https://github.com/Archinowsk/ropetiski-helper",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

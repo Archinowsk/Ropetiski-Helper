@@ -1,0 +1,22 @@
+{
+  "name": "ropetiski-helper",
+  "version": "1.0.0",
+  "description": "Tool for Ropecon 2016 role-playing game help desk",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Archinowsk/ropetiski-helper.git"
+  },
+  "keywords": [
+    "ropecon"
+  ],
+  "author": "Arttu Hanska",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Archinowsk/ropetiski-helper/issues"
+  },
+  "homepage": "https://github.com/Archinowsk/ropetiski-helper"
+}
