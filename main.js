@@ -1,4 +1,4 @@
-//"use strict";
+"use strict";
 
 const electron = require("electron")
 // Module to control application life.
@@ -7,9 +7,6 @@ const app = electron.app
 const BrowserWindow = electron.BrowserWindow
 
 const Datastore = require("nedb")
-
-//global.jQuery = require('jquery');
-//require('bootstrap');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -46,43 +43,6 @@ function createWindow () {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", function(){
-
-    /*
-    var games_db = new Datastore({
-        filename: "./data/games.json",
-        timestampData: true,
-        autoload: true
-    })
-
-    /*
-    // Initialize db
-    var doc = { hello: 'world'
-        , n: 5
-        , today: new Date()
-        , nedbIsAwesome: true
-        , notthere: null
-        , notToBeSaved: undefined  // Will not be saved
-        , fruits: [ 'apple', 'orange', 'pear' ]
-        , infos: { name: 'nedb' }
-    };
-
-    games_db.insert(doc, function (err, newDoc) {
-        // Callback is optional
-        // newDoc is the newly inserted document, including its _id
-        // newDoc has no key called notToBeSaved since its value was undefined
-    });
-    */
-
-
-    // TODO: if db doesn't exist, generate from json
-    /*
-    db.count({}, function (err, count) {
-        if(count <= 0){
-
-        }
-    });
-    */
-
     createWindow();
 })
 
@@ -105,5 +65,3 @@ app.on("activate", function () {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-
-//require("./js/index.js")
