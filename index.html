@@ -1,19 +1,169 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Hello World!</title>
-  </head>
-  <body>
-    <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using node <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
-  </body>
 
-  <script>
-    // You can also require other files to run in this process
-    require('./renderer.js')
-  </script>
+<head>
+
+    <meta charset="UTF-8">
+    <!-- TODO: Manage file location with Grunt -->
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="./css/app.css">
+
+    <!-- Insert this line above script imports  -->
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+
+    <script src="./node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="./js/index.js"></script>
+
+    <title>Ropetiski helper</title>
+
+</head>
+
+<body>
+
+    <h1 class="center">Ropetiski helper</h1>
+
+    <div class="container">
+
+        <ul class="nav nav-tabs" id="appTabs">
+            <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
+            <li><a data-toggle="tab" href="#search">Search</a></li>
+            <li><a data-toggle="tab" href="#game_schedule">Game schedule</a></li>
+            <li><a data-toggle="tab" href="#signup_and_randomize">Starting games and lottery tool</a></li>
+            <li><a data-toggle="tab" href="#priority_tickets">Priority tickets</a></li>
+        </ul>
+
+        <div class="tab-content">
+
+            <div id="home" class="tab-pane fade in active">
+                <h3>Home</h3>
+                <button type="submit" onclick="loadExportToDb();" class="btn btn-default">Load data from JSON</button>
+            </div>
+
+            <div id="search" class="tab-pane fade">
+                <h3>Search</h3>
+                <div class="form-group">
+                    <label for="game_master_name">Game master name (surname + first name):</label>
+                    <input type="text" class="form-control" id="game_master_name" placeholder="Game master name">
+                </div>
+                <div class="form-group">
+                    <label for="game_name">Game name:</label>
+                    <input type="text" class="form-control" id="game_name" placeholder="Game name">
+                </div>
+                <div class="form-group">
+                    <label for="game_room">Game room:</label>
+                    <!--<input type="text" class="form-control" id="game_room" placeholder="Game room">-->
+                    <select id="game_room">
+                        <option value="All">All</option>
+                        <option value="Sali 203a">Sali 203 A</option>
+                        <option value="Sali 203b">Sali 203 B</option>
+                        <option value="Sali 209">Sali 209</option>
+                        <option value="Sali 212">Sali 212</option>
+                        <option value="Sali 214">Sali 214</option>
+                        <option value="Sali 218">Sali 218</option>
+                        <option value="Sali 301">Sali 301</option>
+                        <option value="Sali 302">Sali 302</option>
+                        <option value="Sali 303">Sali 303</option>
+                        <option value="Sali 304">Sali 304</option>
+                        <option value="Sali 306">Sali 306</option>
+                        <option value="Sali 307">Sali 307</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="game_date">Game starting time:</label>
+                    <!--<input type="text" class="form-control" id="game_start_time" placeholder="Game start time">-->
+                    <select id="game_date">
+                        <option value="All">All</option>
+                        <option value="2016-07-29">Friday</option>
+                        <option value="2016-07-30">Saturday</option>
+                        <option value="2016-07-31">Sunday</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="game_start_time">Game starting time:</label>
+                    <!--<input type="text" class="form-control" id="game_start_time" placeholder="Game start time">-->
+                    <select id="game_start_time">
+                        <option value="All">All</option>
+                        <option value="10:00">10:00</option>
+                        <option value="11:00">11:00</option>
+                        <option value="12:00">12:00</option>
+                        <option value="13:00">13:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="16:00">16:00</option>
+                        <option value="17:00">17:00</option>
+                        <option value="18:00">18:00</option>
+                        <option value="19:00">19:00</option>
+                        <option value="20:00">20:00</option>
+                    </select>
+                </div>
+                <button type="submit" onclick="loadGameInfo();" class="btn btn-default">Search games</button>
+
+                </br>
+                <p id="game_info"></p>
+
+            </div>
+
+            <div id="game_schedule" class="tab-pane fade">
+                <h3>Menu 3</h3>
+                <p>Some content in menu 3.</p>
+            </div>
+
+            <div id="signup_and_randomize" class="tab-pane fade">
+
+                <h3>Sign-up and randomizer tool</h3>
+
+                <div class="form-group">
+                    <label for="max_players">Max players:</label>
+                    <input type="number" class="form-control" id="max_players" placeholder="Max number of players">
+                </div>
+
+                <div class="form-group">
+                    <label for="current_players">Number of players:</label>
+                    <input type="number" class="form-control" id="current_players" placeholder="Number of players">
+                </div>
+
+                <button type="submit" onclick="randomize();" class="btn btn-default">Randomize</button>
+
+                <div>
+                    </br>
+                    <p>Following are randomized out:</p>
+                    <p id="extras"></p>
+                </div>
+
+            </div> <!-- signup_and_lottery -->
+
+            <div id="priority_tickets" class="tab-pane fade">
+                <h3>Priority ticket management</h3>
+
+                <div class="form-group">
+                    <label for="ticket_number">Ticket number:</label>
+                    <input type="number" class="form-control" id="ticket_number" placeholder="Ticket number">
+                </div>
+
+                <button type="submit" onclick="checkDb();" class="btn btn-default">Save</button>
+
+                <div>
+                    </br>
+                    <p id="ticket_status"></p>
+                </div>
+
+            </div>
+
+        </div> <!-- /tab-content -->
+
+    </div> <!-- /container -->
+
+</body>
+
+    <script>
+        // You can also require other files to run in this process
+
+        //require("./node_modules/jquery/dist/jquery.min.js")
+        //require("./node_modules/bootstrap/dist/js/bootstrap.min.js")
+
+        require("./renderer.js")
+
+    </script>
+
 </html>

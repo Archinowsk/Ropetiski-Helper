@@ -19,5 +19,11 @@
   "bugs": {
     "url": "https://github.com/Archinowsk/ropetiski-helper/issues"
   },
-  "homepage": "https://github.com/Archinowsk/ropetiski-helper"
+  "homepage": "https://github.com/Archinowsk/ropetiski-helper",
+  "dependencies": {
+    "bootstrap": "^3.3.6",
+    "jquery": "^1.9.1",
+    "jsonfile": "^2.3.1",
+    "nedb": "^1.8.0"
+  }
 }

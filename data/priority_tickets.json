@@ -1,0 +1,5 @@
+{"ticket_number":"123","_id":"SeTjSVXkEXnOdWk1","createdAt":{"$$date":1469020081315},"updatedAt":{"$$date":1469020081315}}
+{"ticket_number":"123","_id":"TwXvLVt1AIF1bEKX","createdAt":{"$$date":1469020101353},"updatedAt":{"$$date":1469020101353}}
+{"hello":"world","n":5,"today":{"$$date":1469019047836},"nedbIsAwesome":true,"notthere":null,"fruits":["apple","orange","pear"],"infos":{"name":"nedb"},"_id":"diECNEXWWR3vyTBV","createdAt":{"$$date":1469019047904},"updatedAt":{"$$date":1469019047904}}
+{"ticket_number":"2","_id":"jyPuVzh6vPk8mxp7","createdAt":{"$$date":1469020400092},"updatedAt":{"$$date":1469020400092}}
+{"ticket_number":"1","_id":"nYgXwIlRTyD17alj","createdAt":{"$$date":1469020388625},"updatedAt":{"$$date":1469020388625}}
