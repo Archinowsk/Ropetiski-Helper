@@ -29,7 +29,7 @@
             <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
             <li><a data-toggle="tab" href="#search">Search</a></li>
             <li><a data-toggle="tab" href="#game_schedule">Game schedule</a></li>
-            <li><a data-toggle="tab" href="#signup_and_randomize">Starting games and lottery tool</a></li>
+            <li><a data-toggle="tab" href="#signup_and_randomize">Lottery tool</a></li>
             <li><a data-toggle="tab" href="#priority_tickets">Priority tickets</a></li>
         </ul>
 
@@ -43,7 +43,7 @@
             <div id="search" class="tab-pane fade">
                 <h3>Search</h3>
                 <div class="form-group">
-                    <label for="game_master_name">Game master name (surname + first name):</label>
+                    <label for="game_master_name">Game master name (last name + first name):</label>
                     <input type="text" class="form-control" id="game_master_name" placeholder="Game master name">
                 </div>
                 <div class="form-group">
@@ -97,10 +97,12 @@
                         <option value="20:00">20:00</option>
                     </select>
                 </div>
+
                 <button type="submit" onclick="loadGameInfo();" class="btn btn-default">Search games</button>
 
-                </br>
-                <p id="game_info"></p>
+                <div>
+                    <p id="game_info"></p>
+                </div>
 
             </div>
 
@@ -111,7 +113,7 @@
 
             <div id="signup_and_randomize" class="tab-pane fade">
 
-                <h3>Sign-up and randomizer tool</h3>
+                <h3>Randomizer tool</h3>
 
                 <div class="form-group">
                     <label for="max_players">Max players:</label>
@@ -126,7 +128,6 @@
                 <button type="submit" onclick="randomize();" class="btn btn-default">Randomize</button>
 
                 <div>
-                    </br>
                     <p>Following are randomized out:</p>
                     <p id="extras"></p>
                 </div>
@@ -134,7 +135,7 @@
             </div> <!-- signup_and_lottery -->
 
             <div id="priority_tickets" class="tab-pane fade">
-                <h3>Priority ticket management</h3>
+                <h3>Priority ticket manager</h3>
 
                 <div class="form-group">
                     <label for="ticket_number">Ticket number:</label>
@@ -144,7 +145,6 @@
                 <button type="submit" onclick="checkDb();" class="btn btn-default">Save</button>
 
                 <div>
-                    </br>
                     <p id="ticket_status"></p>
                 </div>
 
