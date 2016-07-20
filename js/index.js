@@ -60,37 +60,40 @@ function checkDb(){
 
 function loadExportToDb(){
     var games = [];
-    var jsonfile = require('jsonfile');
-    var file = './data/export.json';
-    jsonfile.readFile(file, function(err, obj) {
+    var request = require("request");
+    var url = "https://conbase.ropecon.fi/programs/export.json";
 
-        for(var i = 0 ; i < obj.length ; i++){
-            for(var j = 0 ; j < obj[i].tags.length ; j++){
-                if(obj[i].tags[j] === "Pöytäpelit"){
-                    games.push(obj[i]);
+    request({
+        url: url,
+        json: true
+    }, function (error, response, obj) {
+
+        if (!error && response.statusCode === 200) {
+
+            for(var i = 0 ; i < obj.length ; i++){
+                for(var j = 0 ; j < obj[i].tags.length ; j++){
+                    if(obj[i].tags[j] === "Pöytäpelit"){
+                        games.push(obj[i]);
+                    }
                 }
             }
-        }
 
-        var games_db = new Datastore({
-            filename: "./data/games.json",
-            timestampData: true,
-            autoload: true
-        });
-
-        for(var i = 0; i < games.length ; i++){
-
-            games_db.insert(games[i], function (err, newDoc) {
-                // Callback is optional
-                // newDoc is the newly inserted document, including its _id
-                // newDoc has no key called notToBeSaved since its value was undefined
+            var games_db = new Datastore({
+                filename: "./data/games.json",
+                timestampData: true,
+                autoload: true
             });
+
+            // Delete local db and insert updated version
+            games_db.remove({}, { multi: true }, function (err, numRemoved) {
+                games_db.insert(games, function (err, newDoc) {
+                });
+            });
+
+            console.log(games)
+            //console.log(games.length);
         }
-
-        console.log(games)
-        //console.log(games.length);
-
-    })
+    });
 }
 
 function loadGameInfo(){
@@ -109,20 +112,6 @@ function loadGameInfo(){
         timestampData: true,
         autoload: true
     });
-
-    /*
-    // Count all documents in the datastore
-    db.count({}, function (err, count) {
-      // Number of documents in db
-    });
-    */
-
-    /*
-    // Find all documents in the collection
-    games_db.find({}, function (err, docs) {
-
-    });
-    */
 
     if(gameMasterName.length !== 0){
         queryString += '"people.name": ' + '"' + gameMasterName + '"';
@@ -165,6 +154,7 @@ function loadGameInfo(){
         }
     }
 
+    // End JSON string
     queryString += "}";
 
     if(queryString.length > 0)
@@ -172,12 +162,12 @@ function loadGameInfo(){
         obj = JSON.parse(queryString);
     }
 
-    games_db.find(obj , function (err,docs){
+    // Load games and sort by title
+    games_db.find(obj).sort({title:1}).exec(function (err,docs){
         for(var i = 0; i < docs.length ; i++){
             games.push(docs[i].title);
         }
 
-        $("#game_info").text(games);
+        $("#game_info").text(games.length + " " + games);
     });
-
 }

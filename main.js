@@ -18,11 +18,12 @@ let mainWindow
 function createWindow () {
     // Create the browser window.
     mainWindow = new BrowserWindow({
-        fullscreen: true,
-        //width: 800,
-        //height: 600,
+        fullscreen: false,
+        width: 1200,
+        height: 800,
         frame: true,
-        resizable: true
+        resizable: true,
+        title: "ropetiski-helper"
     })
 
     // and load the index.html of the app.
