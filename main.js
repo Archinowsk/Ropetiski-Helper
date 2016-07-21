@@ -1,5 +1,7 @@
 "use strict";
 
+process.env.NODE_ENV = "developement";
+
 const electron = require("electron")
 // Module to control application life.
 const app = electron.app
@@ -21,11 +23,12 @@ function createWindow () {
         frame: true,
         resizable: true,
         title: "ropetiski-helper"
+        //webSecurity: false
     })
 
     // and load the index.html of the app.
-    //mainWindow.loadURL('file://${__dirname}/index.html')
-    mainWindow.loadURL("C:/Users/archi/Desktop/ropetiski-helper/src/index.html")
+    mainWindow.loadURL('file://${__dirname}/index.html')
+    //mainWindow.loadURL("C:/Users/archi/Desktop/ropetiski-helper/src/index.html")
 
     // Open the DevTools.
     mainWindow.webContents.openDevTools()
