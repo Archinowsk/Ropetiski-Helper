@@ -17,7 +17,7 @@ function createWindow () {
     mainWindow = new BrowserWindow({
         fullscreen: false,
         width: 1200,
-        height: 800,
+        height: 600,
         frame: true,
         resizable: true,
         title: "ropetiski-helper"
