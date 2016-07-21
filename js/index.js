@@ -59,7 +59,7 @@ function checkDb(){
 }
 
 function loadExportToDb(){
-    var games = [];
+    var programs = [];
     var request = require("request");
     var url = "https://conbase.ropecon.fi/programs/export.json";
 
@@ -70,28 +70,25 @@ function loadExportToDb(){
 
         if (!error && response.statusCode === 200) {
 
+            // Store to array
             for(var i = 0 ; i < obj.length ; i++){
-                for(var j = 0 ; j < obj[i].tags.length ; j++){
-                    if(obj[i].tags[j] === "Pöytäpelit"){
-                        games.push(obj[i]);
-                    }
-                }
+                programs.push(obj[i]);
             }
 
-            var games_db = new Datastore({
-                filename: "./data/games.json",
+            var programs_db = new Datastore({
+                filename: "./data/program.json",
                 timestampData: true,
                 autoload: true
             });
 
             // Delete local db and insert updated version
-            games_db.remove({}, { multi: true }, function (err, numRemoved) {
-                games_db.insert(games, function (err, newDoc) {
+            programs_db.remove({}, { multi: true }, function (err, numRemoved) {
+                programs_db.insert(programs, function (err, newDoc) {
                 });
             });
 
-            console.log(games)
-            //console.log(games.length);
+            console.log(programs)
+            console.log(programs.length);
         }
     });
 }
@@ -99,17 +96,18 @@ function loadExportToDb(){
 function loadGameInfo(){
 
     var games = [];
-    var gameMasterName = $("#game_master_name").val();
-    var gameName = $("#game_name").val();
-    var gameRoom = $("#game_room").val();
-    var gameDate = $("#game_date").val();
-    var gameStartTime = $("#game_start_time").val();
+    var otherProgram = [];
+    var gameMasterName = $("#game_master_name").val().trim();
+    var gameName = $("#game_name").val().trim();
+    var gameRoom = $("#game_room").val().trim();
+    var gameDate = $("#game_date").val().trim();
+    var gameStartTime = $("#game_start_time").val().trim();
     var queryString = "{";
     var obj = {};
 
     var games_db = new Datastore({
-        filename: "./data/games.json",
-        timestampData: true,
+        filename: "./data/program.json",
+        //timestampData: true,
         autoload: true
     });
 
@@ -164,10 +162,36 @@ function loadGameInfo(){
 
     // Load games and sort by title
     games_db.find(obj).sort({title:1}).exec(function (err,docs){
+        var GmHours = 0;
+        var otherHours = 0;
+
+        loop1:
         for(var i = 0; i < docs.length ; i++){
-            games.push(docs[i].title);
+            loop2:
+            for(var j = 0 ; j < docs[i].tags.length ; j++){
+                // Role-playing games
+                // TODO: Check if also at Kokemuspiste
+                if(docs[i].tags[j] === "Pöytäpelit"){
+                    games.push(docs[i].title);
+                    GmHours += parseInt(docs[i].mins);
+                    continue loop1;
+                }
+            }
+            // Other program
+            otherProgram.push(docs[i].title);
+            otherHours += parseInt(docs[i].mins);
         }
 
-        $("#game_info").text(games.length + " " + games);
+        var gamesList = games.join("\n");
+        var otherProgramList = otherProgram.join("\n");
+
+        $("#gm_hours").text("Total GM hours: " + GmHours/60 + "h");
+        $("#game_count").text("Number of games: " + games.length);
+        $("#game_list").text(gamesList);
+
+        $("#other_program_hours").text("Total other program hours: " + otherHours/60 + "h");
+        $("#other_program_count").text("Number of other programs: " + otherProgram.length);
+        $("#other_program_list").text(otherProgramList);
+
     });
 }

@@ -8,3 +8,10 @@ div{
 .center{
     text-align: center;
 }
+
+.bold {
+    font-weight: bold;
+}
+.pre-line{
+    white-space: pre-line;
+}
