@@ -4,7 +4,7 @@
 <head>
 
     <meta charset="UTF-8">
-    <!-- TODO: Manage file location with Grunt -->
+
     <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="./css/app.css">
 
@@ -31,6 +31,7 @@
             <li><a data-toggle="tab" href="#game_schedule">Game schedule</a></li>
             <li><a data-toggle="tab" href="#signup_and_randomize">Lottery tool</a></li>
             <li><a data-toggle="tab" href="#priority_tickets">Priority tickets</a></li>
+            <li><a data-toggle="tab" href="#add_game">Add game</a></li>
         </ul>
 
         <div class="tab-content">
@@ -118,7 +119,7 @@
             </div>
 
             <div id="game_schedule" class="tab-pane fade">
-                <h3>Menu 3</h3>
+                <h3>Games starting</h3>
                 <div class="form-group">
                     <label for="schedule_date">Game starting time:</label>
                     <select id="schedule_date">
@@ -146,13 +147,56 @@
                     </select>
                 </div>
 
-                <!-- TODO -->
-                <!-- Print list of GMs with a checkbox and their games -->
-                <!-- Show games with checked GM in the "starting" list -->
-                <!-- Show one game at a time: all game info + arros to move -->
-                <!-- Move randomizer here -->
+                <div>
+                    <button type="submit" onclick="loadStartingGames();" class="btn btn-default">Select games</button>
+                </div>
 
-                <!-- Advertisement mode: roll through games starting in next slot -->
+                <br>
+
+                <div>
+                    <!-- TODO -->
+                    <!-- Introducion mode: show game info and next/prevous arrows -->
+                    <!-- Pass checked starting games array -->
+                    <!-- Move randomizer here -->
+                    <!-- Modal? -->
+
+                    <button type="submit" onclick="startIntroduction();" class="btn btn-default">Introduction mode</button>
+
+                    <!-- TODO -->
+                    <!-- Advertisement mode: roll through games starting in next slot? -->
+                    <!-- Advertisement mode: or just show list of games? -->
+                    <!-- Pass starting games array -->
+                    <!-- Modal? -->
+
+                    <button type="submit" onclick="startAdvertisement();" class="btn btn-default">Advertisement mode</button>
+
+                </div>
+
+                <br>
+
+                <div id="unchecked_game_masters">
+                    <p class="bold">Unchecked game masters</p>
+                    <p id="schedule_gm_count"></p>
+                    <!-- <p id="unchecked_game_masters" class="pre-line"></p> -->
+
+
+                    <!-- TODO -->
+                    <!-- Print list of GMs with a checkbox and their games -->
+
+                </div>
+
+                <br>
+
+                <div>
+                    <p class="bold">Starting games</p>
+                    <p id="schedule_game_count"></p>
+                    <p id="checked_game_masters" class="pre-line"></p>
+
+                    <!-- TODO -->
+                    <!-- Show games with checked GM in the "starting" list -->
+
+                </div>
+
 
 
             </div>
@@ -188,12 +232,23 @@
                     <input type="number" class="form-control" id="ticket_number" placeholder="Ticket number">
                 </div>
 
-                <button type="submit" onclick="checkDb();" class="btn btn-default">Save</button>
+                <button type="submit" onclick="addTicket();" class="btn btn-default">Save</button>
+
+                <div class="form-group">
+                    <label for="ticket_removal_number">Ticket number:</label>
+                    <input type="number" class="form-control" id="ticket_removal_number" placeholder="Ticket number to remove">
+                </div>
+
+                <button type="submit" onclick="removeTicket();" class="btn btn-default">Delete</button>
 
                 <div>
                     <p id="ticket_status"></p>
                 </div>
 
+            </div>
+
+            <div id="add_game" class="tab-pane fade">
+                <h3>Add new game</h3>
             </div>
 
         </div> <!-- /tab-content -->

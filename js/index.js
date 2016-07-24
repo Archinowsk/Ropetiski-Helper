@@ -32,7 +32,7 @@ function randomIntFromInterval(min, max){
     return Math.floor(Math.random()*(max-min+1)+min);
 }
 
-function checkDb(){
+function addTicket(operation){
     // Check if ticket no in db
     var message = "";
     var ticket_number = $("#ticket_number").val();
@@ -51,11 +51,39 @@ function checkDb(){
         // Else add ticket number to db
         else {
             ticket_db.insert({ticket_number : ticket_number});
-            message = "Ticket number saved.";
+            message = "Ticket number " + ticket_number + " saved.";
         }
         $("#ticket_status").text(message);
     });
 
+}
+
+
+function removeTicket(operation){
+    // Check if ticket no in db
+    var message = "";
+    var ticket_number = $("#ticket_number").val();
+
+    var ticket_db = new Datastore({
+        filename: "./data/priority_tickets.json",
+        timestampData: true,
+        autoload: true
+    })
+
+    ticket_db.find({ticket_number : ticket_number}, function (err,docs){
+        // Check if ticket is in db
+        if(typeof docs != "undefined" && docs != null && docs.length > 0){
+            ticket_db.remove({ticket_number : ticket_number});
+            message = "Ticket number " + ticket_number + " removed.";
+
+        }
+        // Else remove ticket from db
+        else {
+            message = "Error: ticket number " + ticket_number + " not in database.";
+
+        }
+        $("#ticket_status").text(message);
+    });
 }
 
 function loadExportToDb(){
@@ -248,34 +276,10 @@ function loadGameInfo(){
 function loadStartingGames(){
 
     var games = [];
-    var gameMasterName = $("#game_master_name").val().trim();
-    var gameName = $("#game_name").val().trim();
-    var gameRoom = $("#game_room").val().trim();
-    var gameDate = $("#game_date").val().trim();
-    var gameStartTime = $("#game_start_time").val().trim();
+    var gameDate = $("#schedule_date").val().trim();
+    var gameStartTime = $("#schedule_start_time").val().trim();
     var queryString = "{";
     var obj = {};
-
-    if(gameMasterName.length !== 0){
-        queryString += '"people.name": ' + '"' + gameMasterName + '"';
-    }
-
-    if(gameName.length !== 0) {
-        if(queryString !== "{"){
-            queryString += ", ";
-        }
-        queryString += '"title": ' + '"' + gameName + '"';
-    }
-
-    if(gameRoom.length !== 0) {
-        // Don't add anything, if searching for all rooms
-        if(gameRoom !== "All"){
-            if(queryString !== "{"){
-                queryString += ", ";
-            }
-            queryString += '"loc.0": ' + '"' + gameRoom + '"';
-        }
-    }
 
     if(gameDate.length !== 0) {
         // Don't add anything, if searching for all dates
@@ -313,18 +317,126 @@ function loadStartingGames(){
 
     // Load games and sort by title
     games_db.find(obj).sort({title:1}).exec(function (err,docs){
-        var GmHours = 0;
-        var otherHours = 0;
         var gamesList = "";
-        var otherProgramList = "";
+        var gameCount = 0;
+        var uncheckedGMs = [];
 
         for(var i = 0; i < docs.length ; i++){
-            gamesList += docs[i].title + "\n";
-            GmHours += parseInt(docs[i].mins);
+            uncheckedGMs.push(docs[i]);
+            gamesList += docs[i].people[0].name + ": " + docs[i].title + "\n";
         }
 
-        $("#gm_hours").text("Total GM hours: " + GmHours/60 + "h");
-        $("#game_count").text("Number of games: " + docs.length);
-        $("#game_list").text(gamesList);
+        var appendElements = "";
+
+        for(var i = 0; i < uncheckedGMs.length ; i++){
+            appendElements += "<p>" + "<input type='checkbox' id='" + i + "'>"
+            + "</input>" + " " + uncheckedGMs[i].people[0].name + ": "
+            + uncheckedGMs[i].title + "</p>" + "\n";
+        }
+
+        // TODO: Remove elements when doing another search
+        $("#unchecked_game_masters").append(appendElements);
+
+        var starting_games_db = new Datastore({
+            filename: "./data/starting_games.json",
+            timestampData: true,
+            autoload: true
+        });
+
+        starting_games_db.remove({}, { multi: true }, function (err, numRemoved) {
+        });
+
+        var checkboxes = document.querySelectorAll("input[type='checkbox']");
+        for(var i = 0; i < checkboxes.length; i++){
+            checkboxes[i].addEventListener("change", function(){
+                // Check checked, add to starting games list
+                if ($(this).is(":checked")) {
+                    checkInGM(this, uncheckedGMs[this.id]);
+                }
+                // Checkbox unchecked, rmeove from starting games list
+                else {
+                    removeCheckInGM(this, uncheckedGMs[this.id]);
+                }
+            });
+        }
+
+        // TODO: Angular two way binding?
+
+        // TODO: show spontaneous games after other games
+
+        //$("#schedule_gm_count").text("Number of GMs: " + docs.length);
+        //$("#unchecked_game_masters").text(gamesList)
+
     });
+}
+
+function checkInGM(checkbox, game){
+    // TODO: add checked GMs to StartingGames array
+
+    console.log("checked " + checkbox.id);
+    console.log(game);
+
+    var starting_games_db = new Datastore({
+        filename: "./data/starting_games.json",
+        timestampData: true,
+        autoload: true
+    });
+
+    starting_games_db.insert(game, function (err, newDoc) {
+        starting_games_db.find({}, function (err,docs){
+            //var startingGames = [];
+            var gamesList = "";
+            var startingGamesCount = 0;
+
+            for(var i = 0; i < docs.length ; i++){
+                gamesList += docs[i].people[0].name + ": " + docs[i].title + "\n";
+                startingGamesCount ++;
+            }
+
+            console.log(gamesList);
+            console.log(startingGamesCount);
+
+            $("#schedule_game_count").text("Number of games starting: " + startingGamesCount);
+            $("#checked_game_masters").text(gamesList);
+        });
+
+    });
+
+}
+
+function removeCheckInGM(checkbox, game){
+
+    var starting_games_db = new Datastore({
+        filename: "./data/starting_games.json",
+        timestampData: true,
+        autoload: true
+    });
+
+    starting_games_db.remove(game, function (err, newDoc) {
+        starting_games_db.find({}, function (err,docs){
+
+            var gamesList = "";
+            var startingGamesCount = 0;
+
+            for(var i = 0; i < docs.length ; i++){
+                gamesList += docs[i].people[0].name + ": " + docs[i].title + "\n";
+                startingGamesCount ++;
+            }
+
+            console.log(gamesList);
+            console.log(startingGamesCount);
+
+            $("#schedule_game_count").text("Number of games starting: " + startingGamesCount);
+            $("#checked_game_masters").text(gamesList);
+        });
+    });
+
+}
+
+function startIntroduction(){
+
+}
+
+function startAdvertisement(){
+
 }
