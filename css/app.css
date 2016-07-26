@@ -15,3 +15,12 @@ div{
 .pre-line{
     white-space: pre-line;
 }
+
+.hidden{
+    display: none;
+}
+
+#extras{
+    font-size: 24px;
+    color: red;
+}

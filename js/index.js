@@ -4,27 +4,58 @@ const Datastore = require("nedb");
 
 function randomize(){
 
+    var priority_players = $("#priority_players").val();
     var max_players = $("#max_players").val();
     var current_players = $("#current_players").val();
+
+    if(priority_players === ""){
+        priority_players = 0;
+    }
 
     if(current_players > max_players){
         var extras_count = current_players - max_players;
         var extras = [];
 
-        for(var i = 0; i < extras_count; i++)
-        {
-            var extra = randomIntFromInterval(1, current_players);
+        // Remove all non-priority players and then priority players
+        if(priority_players > extras_count){
 
-            // Number in array - skip round
-            if(extras.includes(extra) === true){
-                i--;
-            }
-            // Number not in array - store value
-            else {
-                extras.push(extra);
+            // TODO: Complete priority randomizer
+
+            var non_priority_players = current_players-priority_players;
+
+            // Randomize first from non-priority
+
+            // Then from priority
+
+            var message = "Non-priority: " + non_priority_players + " Priority: " + priority_players;
+
+            $("#extras").text(message);
+        }
+
+        // Remove non-priority players
+        else {
+            for(var i = 0; i < extras_count; i++)
+            {
+                var extra = randomIntFromInterval(1, current_players);
+
+                // Priority player - skip round
+                if(extra <= priority_players){
+                    i--;
+                }
+                // Number in array - skip round
+                else if(extras.includes(extra) === true){
+                    i--;
+                }
+                // Number not in array - store value
+                else {
+                    extras.push(extra);
+                }
             }
         }
         $("#extras").text(extras);
+    }
+    else{
+        $("#extras").text("All player fit to the game");
     }
 };
 
@@ -55,9 +86,7 @@ function addTicket(operation){
         }
         $("#ticket_status").text(message);
     });
-
 }
-
 
 function removeTicket(operation){
     // Check if ticket no in db
@@ -75,12 +104,10 @@ function removeTicket(operation){
         if(typeof docs != "undefined" && docs != null && docs.length > 0){
             ticket_db.remove({ticket_number : ticket_number});
             message = "Ticket number " + ticket_number + " removed.";
-
         }
         // Else remove ticket from db
         else {
             message = "Error: ticket number " + ticket_number + " not in database.";
-
         }
         $("#ticket_status").text(message);
     });
@@ -143,7 +170,6 @@ function loadExportToDb(){
                 autoload: true
             });
 
-
             // Delete local games db and insert updated version
             games_db.remove({}, { multi: true }, function (err, numRemoved) {
                 games_db.insert(games, function (err, newDoc) {
@@ -151,12 +177,6 @@ function loadExportToDb(){
             });
 
             $("#load_status").text("Data loaded succesfully");
-
-            console.log(programs)
-            console.log(programs.length);
-
-            console.log(games);
-            console.log(games.length);
         }
         else{
             $("#load_status").text("Error" + error);
@@ -269,7 +289,6 @@ function loadGameInfo(){
         $("#other_program_hours").text("Total other program hours: " + otherHours/60 + "h");
         $("#other_program_count").text("Number of other programs: " + docs.length);
         $("#other_program_list").text(otherProgramList);
-
     });
 }
 
@@ -280,6 +299,8 @@ function loadStartingGames(){
     var gameStartTime = $("#schedule_start_time").val().trim();
     var queryString = "{";
     var obj = {};
+
+    $("#unchecked_game_masters").empty();
 
     if(gameDate.length !== 0) {
         // Don't add anything, if searching for all dates
@@ -316,7 +337,7 @@ function loadStartingGames(){
     });
 
     // Load games and sort by title
-    games_db.find(obj).sort({title:1}).exec(function (err,docs){
+    games_db.find(obj).sort({"people.0.name":1}).exec(function (err,docs){
         var gamesList = "";
         var gameCount = 0;
         var uncheckedGMs = [];
@@ -334,7 +355,6 @@ function loadStartingGames(){
             + uncheckedGMs[i].title + "</p>" + "\n";
         }
 
-        // TODO: Remove elements when doing another search
         $("#unchecked_game_masters").append(appendElements);
 
         var starting_games_db = new Datastore({
@@ -350,31 +370,22 @@ function loadStartingGames(){
         for(var i = 0; i < checkboxes.length; i++){
             checkboxes[i].addEventListener("change", function(){
                 // Check checked, add to starting games list
-                if ($(this).is(":checked")) {
-                    checkInGM(this, uncheckedGMs[this.id]);
+                if ($(this).prop("checked") === true) {
+                    checkInGM(uncheckedGMs[this.id]);
                 }
-                // Checkbox unchecked, rmeove from starting games list
-                else {
-                    removeCheckInGM(this, uncheckedGMs[this.id]);
+                // Checkbox unchecked, remove from starting games list
+                else if ($(this).prop("checked") === false) {
+                    removeCheckInGM(uncheckedGMs[this.id]);
                 }
             });
         }
 
-        // TODO: Angular two way binding?
-
         // TODO: show spontaneous games after other games
-
-        //$("#schedule_gm_count").text("Number of GMs: " + docs.length);
-        //$("#unchecked_game_masters").text(gamesList)
 
     });
 }
 
-function checkInGM(checkbox, game){
-    // TODO: add checked GMs to StartingGames array
-
-    console.log("checked " + checkbox.id);
-    console.log(game);
+function checkInGM(game){
 
     var starting_games_db = new Datastore({
         filename: "./data/starting_games.json",
@@ -383,28 +394,22 @@ function checkInGM(checkbox, game){
     });
 
     starting_games_db.insert(game, function (err, newDoc) {
-        starting_games_db.find({}, function (err,docs){
-            //var startingGames = [];
+        starting_games_db.find({}).sort({"people.0.name":1}).exec(function (err, docs){
             var gamesList = "";
             var startingGamesCount = 0;
 
             for(var i = 0; i < docs.length ; i++){
-                gamesList += docs[i].people[0].name + ": " + docs[i].title + "\n";
+                gamesList += docs[i].people[0].name + " - " + docs[i].title + "\n";
                 startingGamesCount ++;
             }
-
-            console.log(gamesList);
-            console.log(startingGamesCount);
 
             $("#schedule_game_count").text("Number of games starting: " + startingGamesCount);
             $("#checked_game_masters").text(gamesList);
         });
-
     });
-
 }
 
-function removeCheckInGM(checkbox, game){
+function removeCheckInGM(game){
 
     var starting_games_db = new Datastore({
         filename: "./data/starting_games.json",
@@ -413,18 +418,15 @@ function removeCheckInGM(checkbox, game){
     });
 
     starting_games_db.remove(game, function (err, newDoc) {
-        starting_games_db.find({}, function (err,docs){
+        starting_games_db.find({}).sort({"people.0.name":1}).exec(function (err, docs){
 
             var gamesList = "";
             var startingGamesCount = 0;
 
             for(var i = 0; i < docs.length ; i++){
-                gamesList += docs[i].people[0].name + ": " + docs[i].title + "\n";
+                gamesList += docs[i].people[0].name + " - " + docs[i].title + "\n";
                 startingGamesCount ++;
             }
-
-            console.log(gamesList);
-            console.log(startingGamesCount);
 
             $("#schedule_game_count").text("Number of games starting: " + startingGamesCount);
             $("#checked_game_masters").text(gamesList);
@@ -434,9 +436,137 @@ function removeCheckInGM(checkbox, game){
 }
 
 function startIntroduction(){
+    // Change to "Game introduction" tab
+    var tab = "signup_and_randomize";
+    $('#appTabs a[href="#' + tab + '"]').tab('show');
 
+    $("#introduction_status").text("Setting up");
+
+    var starting_games_db = new Datastore({
+        filename: "./data/starting_games.json",
+        timestampData: true,
+        autoload: true
+    });
+
+    starting_games_db.find({}).sort({title:1}).exec(function (err, docs){
+
+        var englishGames = [];
+        var pathfinderGames = [];
+        var shortGames = [];
+        var longGames = [];
+        var spontaneousGames = [];
+
+        loop1:
+        for(var i = 0; i < docs.length ; i++){
+
+            // TODO: if spontaneous game
+
+            // English language games
+            for(var j = 0 ; j < docs[i].tags.length ; j++){
+                if(docs[i].tags[j] === "Englanninkielinen"){
+                  englishGames.push(docs[i]);
+                  continue loop1;
+                }
+            }
+
+            for(var j = 0 ; j < docs[i].attributes.length ; j++){
+                if(docs[i].attributes[j] === "Pathfinder Society"){
+                  pathfinderGames.push(docs[i]);
+                  continue loop1;
+                }
+            }
+
+            // 2-3 hour games
+            if(docs[i].mins <= 180){
+                shortGames.push(docs[i]);
+                continue loop1;
+            }
+            // 4h+ games
+            else if(docs[i].mins > 180){
+                longGames.push(docs[i]);
+                continue loop1;
+            }
+        }
+
+        // Combine lists
+        var games = englishGames.concat(pathfinderGames, shortGames, longGames);
+
+        $("#maxIndex").text(games.length-1);
+
+        var starting_games_db = new Datastore({
+            filename: "./data/starting_games.json",
+            timestampData: true,
+            autoload: true
+        });
+
+        starting_games_db.remove({}, { multi: true }, function (err, numRemoved) {
+            starting_games_db.insert(games, function (err, newDoc) {
+                showIntroduction(0);
+                $("#introduction_status").text("");
+            });
+        });
+    });
+}
+
+function showIntroduction(){
+
+    $("#game_introduction_info").empty();
+
+    var index = parseInt($("#currentIndex").text());
+
+    $("#currentIndex").text()
+
+    var gameNumber = index+1;
+
+    var starting_games_db = new Datastore({
+        filename: "./data/starting_games.json",
+        timestampData: true,
+        autoload: true
+    });
+
+    starting_games_db.find({}, function (err, docs){
+        // Show game
+        var appendElements =
+        "<p>"
+        + "<b>Game number:</b> " + gameNumber + "/" + docs.length + "\n"
+        + "<b>Game name:</b> " + docs[index].title + "\n"
+        + "<b>GM:</b> " + docs[index].people[0].name + "\n"
+        + "<b>Location:</b> " + docs[index].loc + "\n"
+        + "<b>Duration:</b> " + docs[index].mins/60 + "h" + "\n"
+        + "<b>Tags:</b> " + "\n"
+        + "<b>Number of players:</b> " + docs[index].attendance + "\n"
+        + "<b>Attributes:</b> " + "\n"
+        + "<b>Description:</b> " + docs[index].desc + "\n"
+        + "</p>";
+
+        $("#game_introduction_info").append(appendElements);
+    });
+}
+
+function previousGameIntroduction(){
+    var index = parseInt($("#currentIndex").text());
+
+    if(index !== 0){
+        var newIndex = index-1;
+        $("#currentIndex").text(newIndex)
+        showIntroduction();
+    }
+}
+
+function nextGameIntroduction(){
+    var index = parseInt($("#currentIndex").text());
+    var maxIndex = parseInt($("#maxIndex").text());
+
+    if(index !== maxIndex){
+        var newIndex = index+1;
+        $("#currentIndex").text(newIndex)
+        showIntroduction();
+    }
 }
 
 function startAdvertisement(){
+    // Change to "Game advertisement" tab
+    var tab = "advertisement_view";
+    $('#appTabs a[href="#' + tab + '"]').tab('show');
 
 }
