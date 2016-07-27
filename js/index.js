@@ -138,53 +138,57 @@ function randomIntFromInterval(min, max){
 }
 
 function addTicket(operation){
-    // Check if ticket no in db
-    var message = "";
     var ticket_number = $("#ticket_number").val();
 
-    var ticket_db = new Datastore({
-        filename: "./data/priority_tickets.json",
-        timestampData: true,
-        autoload: true
-    })
+    if(ticket_number !== ""){
+        var message = "";
 
-    ticket_db.find({ticket_number : ticket_number}, function (err,docs){
-        // If ticket number is already in db, show error
-        if(typeof docs != "undefined" && docs != null && docs.length > 0){
-            message = "Error: ticket number " + ticket_number + " already in database. Created " + docs[0].createdAt;
-        }
-        // Else add ticket number to db
-        else {
-            ticket_db.insert({ticket_number : ticket_number});
-            message = "Ticket number " + ticket_number + " saved.";
-        }
-        $("#ticket_status").text(message);
-    });
+        var ticket_db = new Datastore({
+            filename: "./data/priority_tickets.json",
+            timestampData: true,
+            autoload: true
+        })
+
+        ticket_db.find({ticket_number : ticket_number}, function (err,docs){
+            // If ticket number is already in db, show error
+            if(typeof docs != "undefined" && docs != null && docs.length > 0){
+                message = "Error: ticket number " + ticket_number + " already in database. Created " + docs[0].createdAt;
+            }
+            // Else add ticket number to db
+            else {
+                ticket_db.insert({ticket_number : ticket_number});
+                message = "Ticket number " + ticket_number + " saved.";
+            }
+            $("#ticket_status").text(message);
+        });
+    }
 }
 
 function removeTicket(){
-    // Check if ticket no in db
-    var message = "";
     var ticket_number = $("#ticket_number").val();
 
-    var ticket_db = new Datastore({
-        filename: "./data/priority_tickets.json",
-        timestampData: true,
-        autoload: true
-    })
+    if(ticket_number !== ""){
+        var message = "";
 
-    ticket_db.find({ticket_number : ticket_number}, function (err,docs){
-        // Check if ticket is in db
-        if(typeof docs != "undefined" && docs != null && docs.length > 0){
-            ticket_db.remove({ticket_number : ticket_number});
-            message = "Ticket number " + ticket_number + " removed.";
-        }
-        // Else remove ticket from db
-        else {
-            message = "Error: ticket number " + ticket_number + " not in database.";
-        }
-        $("#ticket_status").text(message);
-    });
+        var ticket_db = new Datastore({
+            filename: "./data/priority_tickets.json",
+            timestampData: true,
+            autoload: true
+        })
+
+        ticket_db.find({ticket_number : ticket_number}, function (err,docs){
+            // Check if ticket is in db
+            if(typeof docs != "undefined" && docs != null && docs.length > 0){
+                ticket_db.remove({ticket_number : ticket_number});
+                message = "Ticket number " + ticket_number + " removed.";
+            }
+            // Else remove ticket from db
+            else {
+                message = "Error: ticket number " + ticket_number + " not in database.";
+            }
+            $("#ticket_status").text(message);
+        });
+    }
 }
 
 function loadExportToDb(){
@@ -219,7 +223,10 @@ function loadExportToDb(){
                 }
 
                 if(roleplaying === true && experiencePoint === false){
-                    games.push(obj[i]);
+                    // Skip these games
+                    if(obj[i].title !== "#7–00: The Sky Key Solution (1-11)" && obj[i].title !== "Charlie ei surffaa"){
+                        games.push(obj[i]);
+                    }
                 }
                 else {
                     programs.push(obj[i]);
@@ -255,6 +262,10 @@ function loadExportToDb(){
         else{
             $("#load_status").text("Error" + error);
         }
+
+        // TODO: Add tables to games
+        // Parse excel to JSON and add as a new attribute
+
     });
 }
 
@@ -425,7 +436,7 @@ function loadStartingGames(){
 
         for(var i = 0; i < uncheckedGMs.length ; i++){
             appendElements += "<p>" + "<input type='checkbox' id='" + i + "'>"
-            + "</input>" + " " + uncheckedGMs[i].people[0].name + ": "
+            + "</input>" + " " + uncheckedGMs[i].people[0].name + " - "
             + uncheckedGMs[i].title + "</p>" + "\n";
         }
 
@@ -542,7 +553,6 @@ function startIntroduction(){
                   continue loop1;
                 }
             }
-
             for(var j = 0 ; j < docs[i].attributes.length ; j++){
                 if(docs[i].attributes[j] === "Pathfinder Society"){
                   pathfinderGames.push(docs[i]);
@@ -580,6 +590,11 @@ function startIntroduction(){
             });
         });
     });
+
+    // TODO:
+    // Collect statistics: number of players, priority tickets used
+    // rescheduled games, games without players
+
 }
 
 function showIntroduction(){
@@ -674,7 +689,6 @@ function loadMessages(){
 }
 
 function addMessage(){
-    // Check if ticket no in db
     var name = $("#message_sender_name").val();
     var message = $("#message").val();
 

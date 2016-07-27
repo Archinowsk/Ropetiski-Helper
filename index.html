@@ -26,25 +26,19 @@
     <div class="container">
 
         <ul class="nav nav-tabs" id="appTabs">
-            <li class="active"><a data-toggle="tab" href="#home">Home</a></li>
-            <li><a data-toggle="tab" href="#search">Search</a></li>
+            <li class="active"><a data-toggle="tab" href="#search">Search</a></li>
             <li><a data-toggle="tab" href="#game_schedule">Game schedule</a></li>
             <li><a data-toggle="tab" href="#signup_and_randomize">Game introduction</a></li>
             <li><a data-toggle="tab" href="#priority_tickets">Priority tickets</a></li>
             <li><a data-toggle="tab" href="#add_game">Add game</a></li>
             <li><a data-toggle="tab" href="#advertisement_view">Game advertisement</a></li>
             <li><a data-toggle="tab" href="#log_book">Log book</a></li>
+            <li><a data-toggle="tab" href="#settings">Settings</a></li>
         </ul>
 
         <div class="tab-content">
 
-            <div id="home" class="tab-pane fade in active">
-                <h3>Home</h3>
-                <button type="submit" onclick="loadExportToDb();" class="btn btn-default">Load data from Conbase</button>
-                <p id="load_status"></p>
-            </div>
-
-            <div id="search" class="tab-pane fade">
+            <div id="search" class="tab-pane fade in active">
                 <h3>Search</h3>
                 <div class="form-group">
                     <label for="game_master_name">Game master name (last name + first name):</label>
@@ -216,14 +210,14 @@
                 </div>
 
                 <button type="submit" onclick="addTicket();" class="btn btn-default">Save</button>
-
+                <br><br>
                 <div class="form-group">
                     <label for="ticket_removal_number">Ticket number:</label>
                     <input type="number" class="form-control" id="ticket_removal_number" placeholder="Ticket number to remove">
                 </div>
 
                 <button type="submit" onclick="removeTicket();" class="btn btn-default">Delete</button>
-
+                <br><br>
                 <div>
                     <p id="ticket_status"></p>
                 </div>
@@ -240,7 +234,7 @@
             </div>
 
             <div id="advertisement_view" class="tab-pane fade">
-                <h3>Starting games</h3>
+                <h3>Coming up next</h3>
 
                 <!-- TODO -->
                 <!-- Advertisement mode: roll through games starting in next slot? -->
@@ -267,6 +261,14 @@
                 <div id="message_log" class="pre-line"></div>
 
             </div>
+
+            <div id="settings" class="tab-pane fade">
+                <h3>Settings</h3>
+                <button type="submit" onclick="loadExportToDb();" class="btn btn-default">Load data from Conbase</button>
+                <br><br>
+                <p id="load_status">Don't click if you don't know what you're doing! Only for Arttu!</p>
+            </div>
+
         </div> <!-- /tab-content -->
 
     </div> <!-- /container -->
