@@ -12,27 +12,89 @@ function randomize(){
         priority_players = 0;
     }
 
+    // Too many players - randomize some out
     if(current_players > max_players){
+
+        // Number to take out
         var extras_count = current_players - max_players;
         var extras = [];
 
-        // Remove all non-priority players and then priority players
+        // Take out number is bigger than number of non-priorities
+        // Remove non-priorities and randomize out some priorities
         if(priority_players > extras_count){
 
-            // TODO: Complete priority randomizer
+            var non_priority_count = current_players-max_players;
 
-            var non_priority_players = current_players-priority_players;
+            if(non_priority_count > 0){
+                var non_priority_players_list = [];
 
-            // Randomize first from non-priority
+                // Remove non-pririties and priorities
+                if(priority_players > max_players){
+                    var non_priorities_to_remove = current_players-priority_players;
+                }
+                // Remove only non-priorities
+                else if (priority_players < max_players) {
+                    var non_priorities_to_remove = current_players-max_players;
+                }
 
-            // Then from priority
+                // Remove all non-priority
+                for(var i = 0; i < non_priorities_to_remove; i++){
+                    var extra = randomIntFromInterval(1, current_players);
 
-            var message = "Non-priority: " + non_priority_players + " Priority: " + priority_players;
+                    // Priority player - skip round
+                    if(extra <= priority_players){
+                        i--;
+                    }
+                    // Number in array - skip round
+                    else if(non_priority_players_list.includes(extra) === true){
+                        i--;
+                    }
+                    // Number not in array - store value
+                    else {
+                        non_priority_players_list.push(extra);
+                    }
+                }
 
-            $("#extras").text(message);
+                non_priority_players_list.sort();
+
+                $("#extras").text(non_priority_players_list);
+            }
+
+            // Too many priority players - randomize some out
+            if (priority_players > max_players) {
+                //var priority_count = priority_players-max_players
+                var priority_players_list = [];
+                var priorities_to_remove = priority_players-max_players
+
+                for(var i = 0; i < priorities_to_remove; i++)
+                {
+                    var extra = randomIntFromInterval(1, priority_players);
+                    // Number in array - skip round
+                    if(priority_players_list.includes(extra) === true){
+                        i--;
+                    }
+                    // Number not in array - store value
+                    else {
+                        priority_players_list.push(extra);
+                    }
+                }
+
+                priority_players_list.sort();
+
+                var message = "";
+
+                if(non_priority_players_list !== undefined){
+                    message += "Non-priority: " + non_priority_players_list + "\n";
+                }
+
+                message += "Priority: " + priority_players_list;
+
+                $("#extras").text(message);
+            }
+
         }
 
-        // Remove non-priority players
+        // Randomize non-priority players out
         else {
             for(var i = 0; i < extras_count; i++)
             {
@@ -51,8 +113,10 @@ function randomize(){
                     extras.push(extra);
                 }
             }
+
+            extras.sort();
+            $("#extras").text(extras);
         }
-        $("#extras").text(extras);
     }
     else{
         $("#extras").text("All player fit to the game");

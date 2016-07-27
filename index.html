@@ -33,6 +33,7 @@
             <li><a data-toggle="tab" href="#priority_tickets">Priority tickets</a></li>
             <li><a data-toggle="tab" href="#add_game">Add game</a></li>
             <li><a data-toggle="tab" href="#advertisement_view">Game advertisement</a></li>
+            <li><a data-toggle="tab" href="#log_book">Log book</a></li>
         </ul>
 
         <div class="tab-content">
@@ -178,12 +179,6 @@
                 <button type="submit" onclick="previousGameIntroduction();" class="btn btn-default">Previous game</button>
                 <button type="submit" onclick="nextGameIntroduction();" class="btn btn-default">Next game</button>
 
-                <!-- TODO -->
-                <!-- Introducion mode: show game info and next/prevous arrows -->
-                <!-- Pass checked starting games array -->
-                <!-- Move randomizer here -->
-                <!-- Modal? -->
-
                 <h3>Randomizer</h3>
 
                 <div class="form-group">
@@ -207,7 +202,7 @@
                     <br>
                     <p>Following are randomized out:</p>
                     <br>
-                    <p id="extras"></p>
+                    <p id="extras" class="pre-line"></p>
                 </div>
 
             </div>
@@ -255,6 +250,10 @@
 
             </div>
 
+            <div id="log_book" class="tab-pane fade">
+                <!-- TODO -->
+
+            </div>
         </div> <!-- /tab-content -->
 
     </div> <!-- /container -->
