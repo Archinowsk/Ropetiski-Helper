@@ -2,6 +2,16 @@
 
 const Datastore = require("nedb");
 
+$(document).ready(function() {
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        var target = $(e.target).attr("href") // activated tab
+        if(target === "#log_book"){
+            loadMessages()
+        }
+        //alert(target);
+    });
+});
+
 function randomize(){
 
     var priority_players = $("#priority_players").val();
@@ -152,7 +162,7 @@ function addTicket(operation){
     });
 }
 
-function removeTicket(operation){
+function removeTicket(){
     // Check if ticket no in db
     var message = "";
     var ticket_number = $("#ticket_number").val();
@@ -633,4 +643,64 @@ function startAdvertisement(){
     var tab = "advertisement_view";
     $('#appTabs a[href="#' + tab + '"]').tab('show');
 
+}
+
+function loadMessages(){
+
+    $("#message_log").empty();
+
+    var message_db = new Datastore({
+        filename: "./data/messages.json",
+        timestampData: true,
+        autoload: true
+    });
+
+    var appendElements = "";
+
+    message_db.find({}, function (err,docs){
+        for(var i=0;i<docs.length;i++){
+            appendElements +=
+            "<p>"
+            + "<b>Message sender:</b> " + docs[i].name + "\n"
+            + "<b>Time:</b> " + docs[i].createdAt + "\n"
+            + "<b>Message:</b> " + docs[i].message + "\n"
+            + "</p>"
+            + "<button onclick=\"removeMessage(" + "'" + docs[i]._id + "'" + ");\" class='btn btn-default'>Delete</button>" + "\n\n"
+            ;
+        }
+        $("#message_log").append(appendElements);
+        $("#message_number").text("Number of messages: " + docs.length);
+    });
+}
+
+function addMessage(){
+    // Check if ticket no in db
+    var name = $("#message_sender_name").val();
+    var message = $("#message").val();
+
+    var message_db = new Datastore({
+        filename: "./data/messages.json",
+        timestampData: true,
+        autoload: true
+    });
+
+    message_db.insert({name : name, message : message}, function (err, newDoc) {
+        loadMessages();
+    });
+}
+
+
+function removeMessage(id){
+
+    console.log(id)
+
+    var message_db = new Datastore({
+        filename: "./data/messages.json",
+        timestampData: true,
+        autoload: true
+    });
+
+    message_db.remove({_id:id}, function (err, numRemoved) {
+        loadMessages();
+    });
 }
