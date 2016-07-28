@@ -222,10 +222,14 @@ function loadExportToDb(){
                     }
                 }
 
+                // TODO: check game list for other unwanted games
                 if(roleplaying === true && experiencePoint === false){
-                    // Skip these games
-                    if(obj[i].title !== "#7–00: The Sky Key Solution (1-11)" && obj[i].title !== "Charlie ei surffaa"){
+                    // Add these games to other program
+                    if(obj[i].title !== "#7–00: The Sky Key Solution (1-11)" && obj[i].title !== "Charlie ei surffaa" && obj[i].title !== "Garnet Town Gambit: All-Star Game"){
                         games.push(obj[i]);
+                    }
+                    else {
+                        programs.push(obj[i]);
                     }
                 }
                 else {
@@ -366,8 +370,15 @@ function loadGameInfo(){
         var gamesList = "";
         var otherProgramList = "";
 
+
         for(var i = 0; i < docs.length ; i++){
-            otherProgramList += docs[i].title + " (" + docs[i].tags + ")" + "\n";
+            var tags = [];
+            for(var j = 0; j < docs[i].tags.length; j++){
+                tags.push(docs[i].tags[j]);
+            }
+            var tagsAsString = tags.join(', ');
+
+            otherProgramList += docs[i].title +  " - " + docs[i].mins/60 + "h" + " (" + tagsAsString + ")" + "\n";
             otherHours += parseInt(docs[i].mins);
         }
 
@@ -429,14 +440,22 @@ function loadStartingGames(){
 
         for(var i = 0; i < docs.length ; i++){
             uncheckedGMs.push(docs[i]);
-            gamesList += docs[i].people[0].name + ": " + docs[i].title + "\n";
+            //gamesList += namesAsString + ": " + docs[i].title + "\n";
         }
 
         var appendElements = "";
 
         for(var i = 0; i < uncheckedGMs.length ; i++){
+
+            var names = [];
+            for(var j = 0; j < uncheckedGMs[i].people.length; j++){
+                names.push(uncheckedGMs[i].people[j].name);
+            }
+
+            var namesAsString = names.join(', ');
+
             appendElements += "<p>" + "<input type='checkbox' id='" + i + "'>"
-            + "</input>" + " " + uncheckedGMs[i].people[0].name + " - "
+            + "</input>" + " " + namesAsString + " - "
             + uncheckedGMs[i].title + "</p>" + "\n";
         }
 
@@ -449,6 +468,8 @@ function loadStartingGames(){
         });
 
         starting_games_db.remove({}, { multi: true }, function (err, numRemoved) {
+            // Remove all
+            removeCheckInGM({}, { multi: true });
         });
 
         var checkboxes = document.querySelectorAll("input[type='checkbox']");
@@ -484,7 +505,15 @@ function checkInGM(game){
             var startingGamesCount = 0;
 
             for(var i = 0; i < docs.length ; i++){
-                gamesList += docs[i].people[0].name + " - " + docs[i].title + "\n";
+
+                var names = [];
+                for(var j = 0; j < docs[i].people.length; j++){
+                    names.push(docs[i].people[j].name);
+                }
+
+                var namesAsString = names.join(', ');
+
+                gamesList += namesAsString + " - " + docs[i].title + "\n";
                 startingGamesCount ++;
             }
 
@@ -509,7 +538,14 @@ function removeCheckInGM(game){
             var startingGamesCount = 0;
 
             for(var i = 0; i < docs.length ; i++){
-                gamesList += docs[i].people[0].name + " - " + docs[i].title + "\n";
+
+                var names = [];
+                for(var j = 0; j < docs[i].people.length; j++){
+                    names.push(docs[i].people[j].name);
+                }
+
+                var namesAsString = names.join(', ');
+                gamesList += namesAsString + " - " + docs[i].title + "\n";
                 startingGamesCount ++;
             }
 
@@ -613,19 +649,39 @@ function showIntroduction(){
         autoload: true
     });
 
+    // TODO: fix tags, people, attributes
     starting_games_db.find({}, function (err, docs){
+
+        var tags = [];
+        var people = [];
+        var attributes = [];
+
+        for(var i = 0 ; i < docs[index].tags.length ; i++){
+            tags.push(docs[index].tags[i]);
+        }
+        for(var i = 0 ; i < docs[index].people.length ; i++){
+            people.push(docs[index].people[i].name);
+        }
+        for(var i = 0 ; i < docs[index].tags.length ; i++){
+            attributes.push(docs[index].attributes[i]);
+        }
+
+        var tagsAsString = tags.join(', ');
+        var peopleAsString = people.join(', ');
+        var attributesAsString = attributes.join(', ');
+
         // Show game
         var appendElements =
         "<p>"
         + "<b>Game number:</b> " + gameNumber + "/" + docs.length + "\n"
         + "<b>Game name:</b> " + docs[index].title + "\n"
-        + "<b>GM:</b> " + docs[index].people[0].name + "\n"
+        + "<b>GM:</b> " + peopleAsString + "\n"
         + "<b>Location:</b> " + docs[index].loc + "\n"
         + "<b>Duration:</b> " + docs[index].mins/60 + "h" + "\n"
-        + "<b>Tags:</b> " + "\n"
+        + "<b>Tags:</b> " + tagsAsString + "\n"
         + "<b>Number of players:</b> " + docs[index].attendance + "\n"
-        + "<b>Attributes:</b> " + "\n"
-        + "<b>Description:</b> " + docs[index].desc + "\n"
+        + "<b>Attributes:</b> " + attributesAsString + "\n"
+        //+ "<b>Description:</b> " + docs[index].desc + "\n"
         + "</p>";
 
         $("#game_introduction_info").append(appendElements);
