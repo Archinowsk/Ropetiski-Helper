@@ -196,6 +196,7 @@ function removeTicket(){
 }
 
 function loadExportToDb(){
+    $("#setting_load").attr("disabled", disabled)
     var programs = [];
     var games = [];
     var request = require("request");
@@ -297,6 +298,7 @@ function loadExportToDb(){
         // TODO: Add tables to games
         // Parse excel to JSON and add as a new attribute
 
+        $("#setting_load").removeAttrattr("disabled")
     });
 }
 
