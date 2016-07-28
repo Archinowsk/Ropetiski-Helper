@@ -1,6 +1,10 @@
 "use strict";
 
 const Datastore = require("nedb");
+const alasql = require("alasql");
+
+var sorted_games = [];
+var advertisement_index = 0;
 
 $(document).ready(function() {
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -222,7 +226,6 @@ function loadExportToDb(){
                     }
                 }
 
-                // TODO: check game list for other unwanted games
                 if(roleplaying === true && experiencePoint === false){
                     // Add these games to other program
                     if(obj[i].title !== "#7–00: The Sky Key Solution (1-11)" && obj[i].title !== "Charlie ei surffaa" && obj[i].title !== "Garnet Town Gambit: All-Star Game"){
@@ -246,22 +249,46 @@ function loadExportToDb(){
             // Delete local program db and insert updated version
             programs_db.remove({}, { multi: true }, function (err, numRemoved) {
                 programs_db.insert(programs, function (err, newDoc) {
+
+                    alasql('SELECT * FROM XLSX("./data/pelinjohtajat.xlsx",{headers:true})',[],function(data){
+
+                        for(var i = 0; i<games.length;i++){
+
+                            for(var j = 0; j<data.length;j++){
+
+                                var data_name = data[j].Sukunimi + " " + data[j].Etunimi;
+
+                                if(games[i].people[0].name === data_name){
+                                        var data_location = data[j].Paikka;
+                                        //games[i].push("table":data_location);
+                                        games[i]["table"] = data_location;
+                                }
+                            }
+                        }
+
+                        console.log("Games with undefined room: ")
+                        for(var i = 0; i<games.length;i++){
+                            if(games[i].table === undefined){
+                                console.log(games[i].title)
+                            }
+                        }
+                        var games_db = new Datastore({
+                            filename: "./data/games.json",
+                            timestampData: true,
+                            autoload: true
+                        });
+
+                        // Delete local games db and insert updated version
+                        games_db.remove({}, { multi: true }, function (err, numRemoved) {
+                            games_db.insert(games, function (err, newDoc) {
+                                $("#load_status").text("Data loaded succesfully");
+                            });
+                        });
+                    });
                 });
             });
 
-            var games_db = new Datastore({
-                filename: "./data/games.json",
-                //timestampData: true,
-                autoload: true
-            });
 
-            // Delete local games db and insert updated version
-            games_db.remove({}, { multi: true }, function (err, numRemoved) {
-                games_db.insert(games, function (err, newDoc) {
-                });
-            });
-
-            $("#load_status").text("Data loaded succesfully");
         }
         else{
             $("#load_status").text("Error" + error);
@@ -340,15 +367,25 @@ function loadGameInfo(){
         autoload: true
     });
 
+    // TODO: Sort by: game name, GM name
+    //games_db.find(obj).sort({title:1}).exec(function (err,docs){
+
     // Load games and sort by title
-    games_db.find(obj).sort({title:1}).exec(function (err,docs){
+    games_db.find(obj).sort({"people.0.name":1}).exec(function (err,docs){
         var GmHours = 0;
         var otherHours = 0;
         var gamesList = "";
         var otherProgramList = "";
 
         for(var i = 0; i < docs.length ; i++){
-            gamesList += docs[i].title + "\n";
+            var names = [];
+            for(var j = 0; j < docs[i].people.length; j++){
+                names.push(docs[i].people[j].name);
+            }
+
+            var namesAsString = names.join(', ');
+
+            gamesList += namesAsString + " - " + docs[i].title + "\n";
             GmHours += parseInt(docs[i].mins);
         }
 
@@ -373,12 +410,19 @@ function loadGameInfo(){
 
         for(var i = 0; i < docs.length ; i++){
             var tags = [];
+            var names = [];
+
             for(var j = 0; j < docs[i].tags.length; j++){
                 tags.push(docs[i].tags[j]);
             }
-            var tagsAsString = tags.join(', ');
+            for(var j = 0; j < docs[i].people.length; j++){
+                names.push(docs[i].people[j].name);
+            }
 
-            otherProgramList += docs[i].title +  " - " + docs[i].mins/60 + "h" + " (" + tagsAsString + ")" + "\n";
+            var tagsAsString = tags.join(', ');
+            var namesAsString = names.join(', ');
+
+            otherProgramList += namesAsString + " - " + docs[i].title +  " - " + docs[i].mins/60 + "h" + " (" + tagsAsString + ")" + "\n";
             otherHours += parseInt(docs[i].mins);
         }
 
@@ -440,7 +484,6 @@ function loadStartingGames(){
 
         for(var i = 0; i < docs.length ; i++){
             uncheckedGMs.push(docs[i]);
-            //gamesList += namesAsString + ": " + docs[i].title + "\n";
         }
 
         var appendElements = "";
@@ -472,6 +515,18 @@ function loadStartingGames(){
             removeCheckInGM({}, { multi: true });
         });
 
+        var advertised_games_db = new Datastore({
+            filename: "./data/advertised_games.json",
+            timestampData: true,
+            autoload: true
+        });
+
+        advertised_games_db.remove({}, { multi: true }, function (err, numRemoved) {
+            advertised_games_db.insert(docs, function (err, newDoc) {
+                $("#startAdvertisement").removeAttr("disabled");
+            });
+        });
+
         var checkboxes = document.querySelectorAll("input[type='checkbox']");
         for(var i = 0; i < checkboxes.length; i++){
             checkboxes[i].addEventListener("change", function(){
@@ -485,6 +540,8 @@ function loadStartingGames(){
                 }
             });
         }
+
+        $("#startIntroduction").removeAttr("disabled");
 
         // TODO: show spontaneous games after other games
 
@@ -589,6 +646,8 @@ function startIntroduction(){
                   continue loop1;
                 }
             }
+
+            // Pathfinder Society games
             for(var j = 0 ; j < docs[i].attributes.length ; j++){
                 if(docs[i].attributes[j] === "Pathfinder Society"){
                   pathfinderGames.push(docs[i]);
@@ -608,23 +667,32 @@ function startIntroduction(){
             }
         }
 
-        // Combine lists
-        var games = englishGames.concat(pathfinderGames, shortGames, longGames);
+        // TODO: Remove global variable
+        // Combine lists to global variable
+        sorted_games = englishGames.concat(pathfinderGames, shortGames, longGames);
 
-        $("#maxIndex").text(games.length-1);
+        $("#maxIndex").text(sorted_games.length-1);
 
+        $("#currentIndex").text("0")
+        $("#introduction_status").text("");
+        showIntroduction();
+
+        /*
         var starting_games_db = new Datastore({
             filename: "./data/starting_games.json",
             timestampData: true,
             autoload: true
         });
 
+
         starting_games_db.remove({}, { multi: true }, function (err, numRemoved) {
             starting_games_db.insert(games, function (err, newDoc) {
-                showIntroduction(0);
+                $("#currentIndex").text("0")
                 $("#introduction_status").text("");
+                showIntroduction();
             });
         });
+        */
     });
 
     // TODO:
@@ -643,49 +711,48 @@ function showIntroduction(){
 
     var gameNumber = index+1;
 
+    /*
     var starting_games_db = new Datastore({
         filename: "./data/starting_games.json",
         timestampData: true,
         autoload: true
     });
+    */
 
-    // TODO: fix tags, people, attributes
-    starting_games_db.find({}, function (err, docs){
+    var tags = [];
+    var people = [];
+    var attributes = [];
 
-        var tags = [];
-        var people = [];
-        var attributes = [];
+    for(var i = 0 ; i < sorted_games[index].tags.length ; i++){
+        tags.push(sorted_games[index].tags[i]);
+    }
+    for(var i = 0 ; i < sorted_games[index].people.length ; i++){
+        people.push(sorted_games[index].people[i].name);
+    }
+    for(var i = 0 ; i < sorted_games[index].attributes.length ; i++){
+        attributes.push(sorted_games[index].attributes[i]);
+    }
 
-        for(var i = 0 ; i < docs[index].tags.length ; i++){
-            tags.push(docs[index].tags[i]);
-        }
-        for(var i = 0 ; i < docs[index].people.length ; i++){
-            people.push(docs[index].people[i].name);
-        }
-        for(var i = 0 ; i < docs[index].tags.length ; i++){
-            attributes.push(docs[index].attributes[i]);
-        }
+    var tagsAsString = tags.join(', ');
+    var peopleAsString = people.join(', ');
+    var attributesAsString = attributes.join(', ');
 
-        var tagsAsString = tags.join(', ');
-        var peopleAsString = people.join(', ');
-        var attributesAsString = attributes.join(', ');
+    // Show game
+    var appendElements =
+    "<p>"
+    + "<b>Game number:</b> " + gameNumber + "/" + sorted_games.length + "\n"
+    + "<b>Game name:</b> " + sorted_games[index].title + "\n"
+    + "<b>GM:</b> " + peopleAsString + "\n"
+    //+ "<b>Location:</b> " + sorted_games[index].loc + "\n"
+    + "<b>Location:</b> " + sorted_games[index].table + "\n"
+    + "<b>Duration:</b> " + sorted_games[index].mins/60 + "h" + "\n"
+    + "<b>Tags:</b> " + tagsAsString + "\n"
+    + "<b>Number of players:</b> " + sorted_games[index].attendance + "\n"
+    + "<b>Attributes:</b> " + attributesAsString + "\n"
+    + "<b>Description:</b> " + sorted_games[index].desc + "\n"
+    + "</p>";
 
-        // Show game
-        var appendElements =
-        "<p>"
-        + "<b>Game number:</b> " + gameNumber + "/" + docs.length + "\n"
-        + "<b>Game name:</b> " + docs[index].title + "\n"
-        + "<b>GM:</b> " + peopleAsString + "\n"
-        + "<b>Location:</b> " + docs[index].loc + "\n"
-        + "<b>Duration:</b> " + docs[index].mins/60 + "h" + "\n"
-        + "<b>Tags:</b> " + tagsAsString + "\n"
-        + "<b>Number of players:</b> " + docs[index].attendance + "\n"
-        + "<b>Attributes:</b> " + attributesAsString + "\n"
-        //+ "<b>Description:</b> " + docs[index].desc + "\n"
-        + "</p>";
-
-        $("#game_introduction_info").append(appendElements);
-    });
+    $("#game_introduction_info").append(appendElements);
 }
 
 function previousGameIntroduction(){
@@ -713,7 +780,136 @@ function startAdvertisement(){
     // Change to "Game advertisement" tab
     var tab = "advertisement_view";
     $('#appTabs a[href="#' + tab + '"]').tab('show');
+    $("#advertisement_status").text("");
+    $("#advertisement_title").text("Games starting at: " + $("#schedule_start_time").val());
 
+    // TODO: Fix advertisement list view
+    /*
+    $("#game_advertisement_list").empty();
+
+    var advertised_games_db = new Datastore({
+        filename: "./data/advertised_games.json",
+        timestampData: true,
+        autoload: true
+    });
+
+    advertised_games_db.find({}).sort({title:1}).exec(function (err, docs){
+
+        var tags = [];
+        var people = [];
+        var attributes = [];
+        var appendElements = "";
+
+
+        for(var i=0;i<docs.length;i++){
+
+            for(var i = 0 ; i < docs[i].tags.length ; i++){
+                tags.push(docs[i].tags[i]);
+            }
+            for(var i = 0 ; i < docs[i].people.length ; i++){
+                people.push(docs[i].people[i].name);
+            }
+            for(var i = 0 ; i < docs[i].attributes.length ; i++){
+                attributes.push(docs[i].attributes[i]);
+            }
+
+            var tagsAsString = tags.join(', ');
+            var peopleAsString = people.join(', ');
+            var attributesAsString = attributes.join(', ');
+
+            appendElements +=
+            "<p>"
+            + "<b>Game name:</b> " + docs[i].title + "\n"
+            + "<b>GM:</b> " + peopleAsString + "\n"
+            + "<b>Duration:</b> " + docs[i].mins/60 + "h" + "\n"
+            + "<b>Tags:</b> " + tagsAsString + "\n"
+            + "<b>Number of players:</b> " + docs[i].attendance + "\n"
+            + "<b>Attributes:</b> " + attributesAsString + "\n"
+            + "</p>";
+        }
+
+        $("#game_advertisement_list").append(appendElements);
+
+        advertisement_index = 0;
+        showAdvertisement();
+
+        var advertisement_timer = setInterval(showAdvertisement, 3000);
+    });
+    */
+
+    advertisement_index = 0;
+    showAdvertisement();
+
+    var advertisement_timer = setInterval(showAdvertisement, 10000);
+}
+
+// TODO: Stop timer
+/*
+function stopTimer() {
+    clearInterval(advertisement_timer);
+}
+*/
+
+function showAdvertisement(){
+
+    $("#game_advertisements").empty();
+
+    var advertised_games_db = new Datastore({
+        filename: "./data/advertised_games.json",
+        timestampData: true,
+        autoload: true
+    });
+
+    advertised_games_db.find({}).sort({title:1}).exec(function (err, docs){
+
+        // Start from beginning
+        if(advertisement_index > docs.length-1){
+            advertisement_index = 0;
+        }
+
+        var gameNumber = advertisement_index+1;
+
+        var tags = [];
+        var people = [];
+        var attributes = [];
+
+        // Detailed info for one game
+        for(var i = 0 ; i < docs[advertisement_index].tags.length ; i++){
+            tags.push(docs[advertisement_index].tags[i]);
+        }
+        for(var i = 0 ; i < docs[advertisement_index].people.length ; i++){
+            people.push(docs[advertisement_index].people[i].name);
+        }
+        for(var i = 0 ; i < docs[advertisement_index].attributes.length ; i++){
+            attributes.push(docs[advertisement_index].attributes[i]);
+        }
+
+        var tagsAsString = tags.join(', ');
+        var peopleAsString = people.join(', ');
+        var attributesAsString = attributes.join(', ');
+
+        var shortDescription = docs[advertisement_index].desc.substr(1,200) + "...";
+
+        // Show game
+        var appendElements =
+        "<p>"
+        + "<b>Game number:</b> " + gameNumber + "/" + docs.length + "\n"
+        + "<b>Game name:</b> " + docs[advertisement_index].title + "\n"
+        + "<b>GM:</b> " + peopleAsString + "\n"
+        //+ "<b>Location:</b> " + sorted_games[advertisement_index].loc + "\n"
+        + "<b>Location:</b> " + docs[advertisement_index].table + "\n"
+        + "<b>Duration:</b> " + docs[advertisement_index].mins/60 + "h" + "\n"
+        + "<b>Tags:</b> " + tagsAsString + "\n"
+        + "<b>Number of players:</b> " + docs[advertisement_index].attendance + "\n"
+        + "<b>Attributes:</b> " + attributesAsString + "\n"
+        + "<b>Description:</b> " + shortDescription + "\n"
+        + "</p>"
+        ;
+
+        $("#game_advertisements").append(appendElements);
+
+        advertisement_index++
+    });
 }
 
 function loadMessages(){
@@ -759,10 +955,7 @@ function addMessage(){
     });
 }
 
-
 function removeMessage(id){
-
-    console.log(id)
 
     var message_db = new Datastore({
         filename: "./data/messages.json",

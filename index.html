@@ -29,9 +29,9 @@
             <li class="active"><a data-toggle="tab" href="#search">Search</a></li>
             <li><a data-toggle="tab" href="#game_schedule">Game schedule</a></li>
             <li><a data-toggle="tab" href="#signup_and_randomize">Game introduction</a></li>
-            <li><a data-toggle="tab" href="#priority_tickets">Priority tickets</a></li>
-            <li><a data-toggle="tab" href="#add_game">Add game</a></li>
             <li><a data-toggle="tab" href="#advertisement_view">Game advertisement</a></li>
+            <li><a data-toggle="tab" href="#priority_tickets">Priority tickets</a></li>
+            <!-- <li><a data-toggle="tab" href="#add_game">Add game</a></li> -->
             <li><a data-toggle="tab" href="#log_book">Log book</a></li>
             <li><a data-toggle="tab" href="#settings">Settings</a></li>
         </ul>
@@ -142,8 +142,8 @@
                 </div>
                 <br>
                 <div>
-                    <button type="submit" onclick="startIntroduction();" class="btn btn-default">Introduction mode</button>
-                    <button type="submit" onclick="startAdvertisement();" class="btn btn-default">Advertisement mode</button>
+                    <button id="startIntroduction" type="submit" onclick="startIntroduction();" class="btn btn-default" disabled>Introduction mode</button>
+                    <button id="startAdvertisement" type="submit" onclick="startAdvertisement();" class="btn btn-default" disabled>Advertisement mode</button>
                 </div>
                 <br>
                 <div id="unchecked_game_masters">
@@ -224,24 +224,20 @@
 
             </div>
 
+            <!-- TODO -->
+            <!-- Option to edit or add games -->
+            <!-- Store new games to different db -->
+
+            <!--
             <div id="add_game" class="tab-pane fade">
                 <h3>Add new game</h3>
-
-                <!-- TODO -->
-                <!-- Option to edit or add games -->
-                <!-- Store new games to different db -->
-
             </div>
-
+            -->
             <div id="advertisement_view" class="tab-pane fade">
-                <h3>Coming up next</h3>
-
-                <!-- TODO -->
-                <!-- Advertisement mode: roll through games starting in next slot? -->
-                <!-- Advertisement mode: or just show list of games? -->
-                <!-- Pass starting games array -->
-                <!-- Modal? -->
-
+                <h3 id="advertisement_title"></h3>
+                <p id="advertisement_status">Advertisement not running. Select games from "Game schedule".</p>
+                <div id="game_advertisement_list" class="pre-line"></div>
+                <div id="game_advertisements" class="pre-line"></div>
             </div>
 
             <div id="log_book" class="tab-pane fade">
