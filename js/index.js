@@ -209,9 +209,7 @@ function loadExportToDb(){
         json: true
     }, function (error, response, obj) {
 
-        if (!error && response.statusCode === 
-
-) {
+        if (!error && response.statusCode === 200) {
             var roleplaying = false;
             var experiencePoint = false;
 
