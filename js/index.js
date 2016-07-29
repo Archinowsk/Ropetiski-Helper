@@ -196,7 +196,7 @@ function removeTicket(){
 }
 
 function loadExportToDb(){
-    $("#setting_load").attr("disabled", disabled)
+    $("#setting_load").attr("disabled", true)
     var programs = [];
     var games = [];
     var request = require("request");
@@ -252,13 +252,11 @@ function loadExportToDb(){
                 programs_db.insert(programs, function (err, newDoc) {
 
                     alasql('SELECT * FROM XLSX("./data/pelinjohtajat.xlsx",{headers:true})',[],function(data){
-
                         for(var i = 0; i<games.length;i++){
-
                             for(var j = 0; j<data.length;j++){
-
                                 var data_name = data[j].Sukunimi + " " + data[j].Etunimi;
-
+                                var room = data[j].Huone;
+                                //if(games[i].people[0].name === data_name && games[i].title === data[j].Peli){
                                 if(games[i].people[0].name === data_name){
                                         var data_location = data[j].Paikka;
                                         //games[i].push("table":data_location);
@@ -267,12 +265,17 @@ function loadExportToDb(){
                             }
                         }
 
-                        console.log("Games with undefined room: ")
+                        console.log("Games with undefined table: ")
+                        var incorrect = 0;
+
                         for(var i = 0; i<games.length;i++){
                             if(games[i].table === undefined){
+                                incorrect++;
                                 console.log(games[i].title)
                             }
                         }
+                        console.log(incorrect)
+
                         var games_db = new Datastore({
                             filename: "./data/games.json",
                             timestampData: true,
@@ -298,7 +301,7 @@ function loadExportToDb(){
         // TODO: Add tables to games
         // Parse excel to JSON and add as a new attribute
 
-        $("#setting_load").removeAttrattr("disabled")
+        $("#setting_load").removeAttr("disabled")
     });
 }
 
@@ -745,8 +748,8 @@ function showIntroduction(){
     + "<b>Game number:</b> " + gameNumber + "/" + sorted_games.length + "\n"
     + "<b>Game name:</b> " + sorted_games[index].title + "\n"
     + "<b>GM:</b> " + peopleAsString + "\n"
-    //+ "<b>Location:</b> " + sorted_games[index].loc + "\n"
-    + "<b>Location:</b> " + sorted_games[index].table + "\n"
+    + "<b>Location:</b> " + sorted_games[index].loc + "\n"
+    //+ "<b>Table:</b> " + sorted_games[index].table + "\n"
     + "<b>Duration:</b> " + sorted_games[index].mins/60 + "h" + "\n"
     + "<b>Tags:</b> " + tagsAsString + "\n"
     + "<b>Number of players:</b> " + sorted_games[index].attendance + "\n"
