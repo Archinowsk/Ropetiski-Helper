@@ -256,11 +256,13 @@ function loadExportToDb(){
                             for(var j = 0; j<data.length;j++){
                                 var data_name = data[j].Sukunimi + " " + data[j].Etunimi;
                                 var room = data[j].Huone;
+                                if(games[i].people[0].name === data_name && games[i].loc[0] === room && games[i].time === data[j].Aloitus){
                                 //if(games[i].people[0].name === data_name && games[i].title === data[j].Peli){
-                                if(games[i].people[0].name === data_name){
+                                //if(games[i].people[0].name === data_name){
                                         var data_location = data[j].Paikka;
                                         //games[i].push("table":data_location);
                                         games[i]["table"] = data_location;
+                                        continue;
                                 }
                             }
                         }
@@ -271,7 +273,7 @@ function loadExportToDb(){
                         for(var i = 0; i<games.length;i++){
                             if(games[i].table === undefined){
                                 incorrect++;
-                                console.log(games[i].title)
+                                console.log(games[i].title + " " + games[i].time + " " + games[i].date)
                             }
                         }
                         console.log(incorrect)
@@ -749,7 +751,7 @@ function showIntroduction(){
     + "<b>Game name:</b> " + sorted_games[index].title + "\n"
     + "<b>GM:</b> " + peopleAsString + "\n"
     + "<b>Location:</b> " + sorted_games[index].loc + "\n"
-    //+ "<b>Table:</b> " + sorted_games[index].table + "\n"
+    + "<b>Table:</b> " + sorted_games[index].table + "\n"
     + "<b>Duration:</b> " + sorted_games[index].mins/60 + "h" + "\n"
     + "<b>Tags:</b> " + tagsAsString + "\n"
     + "<b>Number of players:</b> " + sorted_games[index].attendance + "\n"
