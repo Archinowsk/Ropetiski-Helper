@@ -209,7 +209,9 @@ function loadExportToDb(){
         json: true
     }, function (error, response, obj) {
 
-        if (!error && response.statusCode === 200) {
+        if (!error && response.statusCode === 
+
+) {
             var roleplaying = false;
             var experiencePoint = false;
 
@@ -895,7 +897,7 @@ function showAdvertisement(){
         var peopleAsString = people.join(', ');
         var attributesAsString = attributes.join(', ');
 
-        var shortDescription = docs[advertisement_index].desc.substr(1,200) + "...";
+        var shortDescription = docs[advertisement_index].desc.substr(0,200) + "...";
 
         // Show game
         var appendElements =
