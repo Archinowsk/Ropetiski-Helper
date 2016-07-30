@@ -18,9 +18,9 @@ $(document).ready(function() {
 
 function randomize(){
 
-    var priority_players = $("#priority_players").val();
-    var max_players = $("#max_players").val();
-    var current_players = $("#current_players").val();
+    var priority_players = parseInt($("#priority_players").val());
+    var max_players = parseInt($("#max_players").val());
+    var current_players = parseInt($("#current_players").val());
 
     if(priority_players === ""){
         priority_players = 0;
@@ -764,12 +764,19 @@ function showIntroduction(){
 
 function previousGameIntroduction(){
     var index = parseInt($("#currentIndex").text());
+    var maxIndex = parseInt($("#maxIndex").text());
 
     if(index !== 0){
         var newIndex = index-1;
         $("#currentIndex").text(newIndex)
         showIntroduction();
     }
+    else if(index === 0){
+        var newIndex = maxIndex
+        $("#currentIndex").text(newIndex)
+        showIntroduction();
+    }
+
 }
 
 function nextGameIntroduction(){
@@ -778,6 +785,11 @@ function nextGameIntroduction(){
 
     if(index !== maxIndex){
         var newIndex = index+1;
+        $("#currentIndex").text(newIndex)
+        showIntroduction();
+    }
+    else if(index === maxIndex){
+        var newIndex = 0;
         $("#currentIndex").text(newIndex)
         showIntroduction();
     }

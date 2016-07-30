@@ -161,6 +161,10 @@
             <div id="signup_and_randomize" class="tab-pane fade">
 
                 <h3>Game introduction</h3>
+
+                <button type="submit" onclick="previousGameIntroduction();" class="btn btn-default">Previous game</button>
+                <button type="submit" onclick="nextGameIntroduction();" class="btn btn-default">Next game</button>
+                
                 <p id="introduction_status">Introduction not running. Select games from "Game schedule".</p>
 
                 <div id="game_introduction_info" class="pre-line">
@@ -169,9 +173,6 @@
 
                 <span id="currentIndex" class="hidden">0</span>
                 <span id="maxIndex" class="hidden">0</span>
-
-                <button type="submit" onclick="previousGameIntroduction();" class="btn btn-default">Previous game</button>
-                <button type="submit" onclick="nextGameIntroduction();" class="btn btn-default">Next game</button>
 
                 <h3>Randomizer</h3>
 
